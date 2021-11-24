@@ -1,4 +1,5 @@
 import Customer from './components/Customer';
+import CustomerAdd from './components/CustomerAdd'
 import './App.css';
 import Paper from '@material-ui/core/Paper';
 import Table from '@material-ui/core/Table';
@@ -41,6 +42,16 @@ function App(props) {
 
   console.log('App mounted');
 
+  let stateRefresh = () => {
+    setState({
+      customers: '',
+      completed: 0
+    });
+    callApi()
+    .then(res => setState({customers: res}))
+    .catch(err => console.log(err));
+  }
+
   useEffect(() => {
     if (didMount) {
       console.log('mounted');
@@ -54,7 +65,7 @@ function App(props) {
 
   const { classes } = props
   return (
-      <Paper className={classes.root}>
+    <div>      <Paper className={classes.root}>
        <Table className={classes.table}>
           <TableHead>
             <TableRow>
@@ -71,6 +82,8 @@ function App(props) {
           </TableBody>
         </Table>
       </Paper>
+      <CustomerAdd stateRefresh={stateRefresh} />
+    </div>
   );
 }
 
