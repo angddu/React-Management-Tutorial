@@ -31,7 +31,6 @@ function useDidMount() {
   useEffect(() => {
     didMountRef.current = false;
   }, [didMountRef]);
-
   return didMountRef.current
 };
 
@@ -44,80 +43,55 @@ function sleep(ms) {
 const callApi = async () => {
   const response = await fetch('/api/customers');
   const body = await response.json();
-  /* await sleep(6000); */
+  await sleep(1000);
   return body;
 };
 
-function useInterval(callback, delay) {
-  const savedCallback = useRef();
-
-  // Remember the latest function.
-  useEffect(() => {
-    savedCallback.current = callback;
-  }, [callback]);
-
-  // Set up the interval.
-  useEffect(() => {
-    function tick() {
-      savedCallback.current();
-    }
-    if (delay !== null) {
-      let id = setInterval(tick, delay);
-      return () => clearInterval(id);
-    }
-  }, [delay]);
-}
-
 function App(props) {
-  let didMount = useDidMount();  
+  const didMount = useDidMount();  
   const [state, setState] = useState({customers: null, completed: 0});
   const waitCnt = useRef(0);
 
-  const [refresh, setRefresh] = useState(false);
+  //console.log('App mounted');
 
-  console.log('App mounted');
+  const stateRefresh = () => {
+    setState({
+      customers: ''
+    });
 
-  const [delay, setDelay] = useState(100);
-  const [isRunning, setIsRunning] = useState(false);
+    const timer = setInterval(() => {
+        setState((state) => ({completed: (state.completed > 100) ? 0 : state.completed + 20}));
+    }, 100);
+    callApi()
+    .then(res => setState({customers: res}))
+    .catch(err => console.log(err))
+    .finally(() => clearInterval(timer));
+  }
 
-  if (refresh === true)
-    didMount = true;
-
-  useInterval(() => {
-    setDelay(delay);
+  useEffect(() => {
     if (waitCnt.current <= 0  && state.completed === 100)
       waitCnt.current = 4; 
     else if (waitCnt.current > 0)
       waitCnt.current -= 1;
 
-    if (waitCnt.current <= 0)
-      setState({completed: (state.completed > 100) ? 0 : state.completed + 5});
-    else
-      setState({completed: 0});
-  }, isRunning ? delay : null);
+    const progress = () => {
+      if (waitCnt.current <= 0)
+        setState((state) => ({completed: (state.completed > 100) ? 0 : state.completed + 20}));
+      else 
+        setState({completed: 0});
+    };
 
-  const stateRefresh = () => {
-    setState({
-      customers: '',
-      completed: 0
-    });
-
-    setRefresh(true);
-  }
-
-  useEffect(() => {
     if (didMount) {
-      setRefresh(false);
-      setIsRunning(true);
+      const timer = setInterval(progress, 100);
 
       callApi()
       .then(res => setState({customers: res}))
       .catch(err => console.log(err))
-      .finally(() =>setIsRunning(false));
+      .finally(() => clearInterval(timer));
     } else {
-      console.log('state updated');
+      //console.log('state updated');
     }
-  }, [state, didMount, refresh]);
+  }, [state, didMount]);
 
   const { classes } = props
   return (
