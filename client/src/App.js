@@ -10,6 +10,8 @@ import TableCell from '@material-ui/core/TableCell';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { withStyles } from '@material-ui/core/styles';
 import React, { useState, useRef, useEffect } from 'react';
+import { ThemeProvider, unstable_createMuiStrictModeTheme } from '@material-ui/core'
+const theme = unstable_createMuiStrictModeTheme();
 
 const styles = theme => ({
   root: {
@@ -35,11 +37,13 @@ function useDidMount() {
   return didMountRef.current
 };
 
+/*
 function sleep(ms) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
 } 
+*/
 
 const callApi = async () => {
   const response = await fetch('/api/customers');
@@ -70,6 +74,7 @@ function useInterval(callback, delay) {
 
 function App(props) {
   let didMount = useDidMount();  
+  const [isInit, setisInit] = useState(true);
   const [state, setState] = useState({customers: null, completed: 0});
   const waitCnt = useRef(0);
 
@@ -122,6 +127,8 @@ function App(props) {
   const { classes } = props
   return (
     <div>      
+      {isInit ? (
+      <ThemeProvider theme={theme}>
       <Paper className={classes.root}>
        <Table className={classes.table}>
           <TableHead>
@@ -150,6 +157,10 @@ function App(props) {
         </Table>
       </Paper>
       <CustomerAdd stateRefresh={stateRefresh} />
+      </ThemeProvider>
+      ) : (
+        ' 동기화 중입니다.'
+      )}
     </div>
   );
 }
