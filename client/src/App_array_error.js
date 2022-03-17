@@ -150,8 +150,7 @@ function useInterval(callback, delay) {
 function App(props) {
   let didMount = useDidMount();  
   const [isInit, setisInit] = useState(true);
-  const [state, setState] = useState({customers: null, completed: 0});
-  const [searchKeyword, setSearchKeyword] = useState('');
+  const [state, setState] = useState({customers:null, completed:0, search:''});
   const waitCnt = useRef(0);
 
   const [refresh, setRefresh] = useState(false);
@@ -179,11 +178,11 @@ function App(props) {
 
   const stateRefresh = () => {
     setState({
-      customers: '',
-      completed: 0,
+      customers:'',
+      completed:0,
+      search:''
     });
     setRefresh(true);
-    setSearchKeyword('');
   }
   
   useEffect(() => {
@@ -202,14 +201,18 @@ function App(props) {
 
   const handleValueChange = (e) => {
     console.log("KEUN1 :" + e.target.value);
-    setSearchKeyword(e.target.value);
+    setState({search:e.target.value});
   }
 
   const fillteredComponents = (data) => {
-    console.log("KEUN T : "+ searchKeyword);
+
+    //setState({search:'최종근'});
+    console.log("KEUN T : "+ state.completed);
+
     data = data.filter((c) => {
-      return c.name.indexOf(searchKeyword) > -1;
+      return c.name.indexOf(state.search) > -1;
     });
+
     return data.map((c) =>{
       return (<Customer  stateRefresh={stateRefresh} key={c.id} id={c.id} image={c.image} name={c.name} birthday={c.birthday} gender={c.gender} job={c.job}/>)
     });
@@ -247,7 +250,7 @@ function App(props) {
                   input: classes.inputInput,
                 }}
                 name="searchKeyword"
-                value={searchKeyword}
+                value={state[2]}
                 onChange={handleValueChange} 
               />
             </div>
